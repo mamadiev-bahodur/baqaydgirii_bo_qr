@@ -1,0 +1,47 @@
+
+@startuml sequence-attendance
+title Диаграммаи пайдарпайии сабти ҳозиршавӣ бо QR
+
+skinparam shadowing false
+
+actor "Донишҷӯ\n(Student)" as S
+participant "Браузери телефон" as B
+participant "PHP\nrecord_attendance.php" as C
+participant "Қабати кор бо БД\nconfig/db.php" as R
+database "MySQL\nПойгоҳи додаҳо" as DB
+
+S -> B : Скан кардани рамзи QR
+B -> C : POST /record_attendance.php\n(token, session_id)
+activate C
+
+C -> C : Санҷидани маълумоти воридшуда
+C -> R : Пайвастшавӣ ба пойгоҳи додаҳо
+R -> DB : Санҷидани рамзи QR ва дарс
+DB --> R : Натиҷаи санҷиш
+R --> C : Маълумоти дарс ва рамз
+
+alt Рамз фаъол ва донишҷӯ ба гурӯҳ мувофиқ аст
+
+    C -> R : Санҷидани ҳозиршавии такрорӣ
+    R -> DB : SELECT сабти донишҷӯ барои дарс
+    DB --> R : Натиҷаи ҷустуҷӯ
+    R --> C : Маълумоти сабти пешина
+
+    alt Ҳозиршавӣ ҳанӯз сабт нашудааст
+        C -> R : Илова кардани ҳозиршавӣ
+        R -> DB : INSERT сабти ҳозиршавӣ
+        DB --> R : Сабт бомуваффақият
+        R --> C : Натиҷаи сабт
+        C --> B : HTTP 200 - Ҳозиршавӣ сабт шуд
+    else Ҳозиршавӣ қаблан сабт шудааст
+        C --> B : HTTP 409 - Сабти такрорӣ
+    end
+
+else Рамз нодуруст ё муҳлаташ гузаштааст
+    C --> B : HTTP 400 - Рамз нодуруст аст
+end
+
+deactivate C
+B --> S : Намоиш додани натиҷа
+
+@enduml

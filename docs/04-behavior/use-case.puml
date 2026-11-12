@@ -1,0 +1,63 @@
+
+@startuml use-case
+left to right direction
+title Диаграммаи вариантҳои истифодаи низоми ҳозиршавии донишҷӯён бо QR
+
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "Маъмур\n(Administrator)" as A
+actor "Омӯзгор\n(Teacher)" as T
+actor "Донишҷӯ\n(Student)" as S
+
+rectangle "Низоми баҳисобгирии ҳозиршавӣ бо QR" {
+
+    usecase "Ворид шудан ба низом" as UC1
+    usecase "Идора кардани истифодабарандагон" as UC2
+    usecase "Идора кардани гурӯҳҳо" as UC3
+    usecase "Оғоз кардани дарс" as UC4
+    usecase "Намоиш додани рамзи QR" as UC5
+    usecase "Нав кардани рамзи QR\nҳар 30 сония" as UC6
+    usecase "Сабт кардани ҳозиршавӣ" as UC7
+    usecase "Санҷидани рамзи QR" as UC8
+    usecase "Дидани рӯйхати ҳозиршавӣ" as UC9
+    usecase "Дидани таърихи ҳозиршавӣ" as UC10
+    usecase "Дидани ҳисобот" as UC11
+    usecase "Содироти ҳисобот ба CSV" as UC12
+}
+
+A --> UC1
+A --> UC2
+A --> UC3
+A --> UC11
+A --> UC12
+
+T --> UC1
+T --> UC4
+T --> UC5
+T --> UC6
+T --> UC9
+T --> UC11
+
+S --> UC1
+S --> UC7
+S --> UC10
+
+' ФТ-01: воридшавӣ
+' ФТ-02: тақсимоти ҳуқуқ аз рӯйи нақш
+' ФТ-03: идоракунии истифодабарандагон ва гурӯҳҳо
+' ФТ-04: оғози дарс
+' ФТ-05 ва ФТ-06: сохтани QR ва навсозии он
+' ФТ-07: скан кардани QR
+' ФТ-08: санҷидани QR, гурӯҳ ва дарс
+' ФТ-09: пешгирии сабти такрорӣ
+' ФТ-10: нигоҳ доштани сана ва вақти ҳозиршавӣ
+' ФТ-11: дидани рӯйхати ҳозиршавӣ
+' ФТ-12: ҳисобот
+' ФТ-13: таърихи шахсӣ
+' ФТ-14: содироти CSV
+
+UC7 ..> UC8 : <<include>>
+UC12 ..> UC11 : <<extend>>
+
+@enduml
