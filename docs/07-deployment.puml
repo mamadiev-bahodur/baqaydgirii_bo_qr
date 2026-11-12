@@ -1,0 +1,52 @@
+
+@startuml
+title Диаграммаи ҷойгиркунии системаи ҳозиршавии донишҷӯён бо QR
+
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam componentStyle rectangle
+
+node "Компютер ё телефони истифодабаранда" as Client {
+    artifact "Web Browser\nChrome / Firefox" as Browser
+}
+
+node "Сервери маҳаллӣ\nXAMPP" as Server {
+    component "Apache Web Server\nPort 80" as Apache
+
+    component "PHP 8.2\nBackend Application" as PHP
+
+    folder "Лоиҳаи QR Attendance" as Project {
+        artifact "login.php" as Login
+        artifact "dashboard.php" as Dashboard
+        artifact "scan.php" as Scan
+        artifact "QR Generator\n30 seconds" as QR
+    }
+}
+
+database "MySQL / MariaDB\nPort 3306" as DB {
+    artifact "student_attendance_qr" as Database
+}
+
+Browser --> Apache : HTTP / HTTPS\nPort 80 / 443
+Apache --> PHP : PHP Processing
+PHP --> Project : Execute PHP Files
+PHP --> DB : MySQL Protocol\nPort 3306
+
+note right of DB
+  Ҷадвалҳо:
+  - student_groups
+  - users
+  - class_sessions
+  - qr_tokens
+  - attendance
+  - audit_logs
+  - login_attempts
+end note
+
+note bottom of Client
+  Донишҷӯ бо телефони худ
+  QR-кодро скан мекунад.
+end note
+
+@enduml
+
