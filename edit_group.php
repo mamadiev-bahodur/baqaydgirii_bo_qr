@@ -1,0 +1,6 @@
+<?php
+require_once __DIR__.'/config/auth.php';require_role('admin');$id=(int)($_GET['id']??$_POST['id']??0);$st=$pdo->prepare('SELECT * FROM student_groups WHERE id=?');$st->execute([$id]);$group=$st->fetch();if(!$group){http_response_code(404);exit('Гурӯҳ ёфт нашуд.');}$error='';
+if($_SERVER['REQUEST_METHOD']==='POST'){verify_csrf();$name=trim($_POST['group_name']??'');if($name==='')$error='Номи гурӯҳро ворид кунед.';else{try{$pdo->prepare('UPDATE student_groups SET group_name=? WHERE id=?')->execute([$name,$id]);audit_log($pdo,'group_update','Гурӯҳ тағйир ёфт: '.$id);header('Location: admin.php');exit;}catch(PDOException $e){$error='Ин ном аллакай истифода мешавад.';}}}
+$pageTitle='Таҳрири гурӯҳ';require __DIR__.'/partials/header.php';?>
+<div class="content-card" style="max-width:600px"><h3>Таҳрири гурӯҳ</h3><?php if($error):?><div class="alert alert-danger"><?=e($error)?></div><?php endif;?><form method="post"><input type="hidden" name="csrf" value="<?=e(csrf_token())?>"><input type="hidden" name="id" value="<?=$id?>"><label class="form-label">Номи гурӯҳ</label><input class="form-control mb-3" name="group_name" value="<?=e($group['group_name'])?>" required><button class="btn btn-primary">Захира кардан</button> <a class="btn btn-light" href="admin.php">Бозгашт</a></form></div>
+<?php require __DIR__.'/partials/footer.php'; ?>
