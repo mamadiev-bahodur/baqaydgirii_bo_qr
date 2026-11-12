@@ -1,0 +1,91 @@
+
+@startuml er-diagram
+title attendance_qr: Модели мантиқии пойгоҳи додаҳо
+
+hide circle
+skinparam linetype ortho
+skinparam entity {
+    BackgroundColor #EAF2F8
+    BorderColor #2874A6
+}
+
+entity groups {
+  * id : INT <<PK>>
+  --
+  * name : VARCHAR(50) <<UQ>>
+  * course : INT
+  * faculty : VARCHAR(150)
+}
+
+entity users {
+  * id : INT <<PK>>
+  --
+  group_id : INT <<FK>>
+  * full_name : VARCHAR(150)
+  * username : VARCHAR(50) <<UQ>>
+  * password_hash : VARCHAR(255)
+  * role : ENUM
+  * is_active : TINYINT(1)
+  * created_at : DATETIME
+}
+
+entity subjects {
+  * id : INT <<PK>>
+  --
+  * name : VARCHAR(150) <<UQ>>
+  description : TEXT
+}
+
+entity lessons {
+  * id : INT <<PK>>
+  --
+  * group_id : INT <<FK>>
+  * subject_id : INT <<FK>>
+  * teacher_id : INT <<FK>>
+  * lesson_date : DATE
+  * start_time : TIME
+  * end_time : TIME
+  * status : ENUM
+}
+
+entity qr_tokens {
+  * id : INT <<PK>>
+  --
+  * lesson_id : INT <<FK>>
+  * token : VARCHAR(255) <<UQ>>
+  * created_at : DATETIME
+  * expires_at : DATETIME
+}
+
+entity attendance {
+  * id : INT <<PK>>
+  --
+  * student_id : INT <<FK>>
+  * lesson_id : INT <<FK>>
+  * qr_token_id : INT <<FK>>
+  * status : ENUM
+  * attendance_time : DATETIME
+  --
+  UNIQUE(student_id, lesson_id)
+}
+
+groups |o--o{ users : group_id
+groups ||--o{ lessons : group_id
+subjects ||--o{ lessons : subject_id
+users ||--o{ lessons : teacher_id
+lessons ||--o{ qr_tokens : lesson_id
+users ||--o{ attendance : student_id
+lessons ||--o{ attendance : lesson_id
+qr_tokens ||--o{ attendance : qr_token_id
+
+note right of qr_tokens
+  QR token ҳар 30 сония нав мешавад.
+  expires_at вақти анҷоми эътиборро нишон медиҳад.
+end note
+
+note bottom of attendance
+  Ҷадвали пайвасткунанда барои алоқаи M:N
+  байни донишҷӯён ва дарсҳо.
+end note
+
+@enduml
