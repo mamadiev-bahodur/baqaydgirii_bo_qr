@@ -1,0 +1,122 @@
+@startuml class
+title Диаграммаи синфҳои низоми ҳозиршавии донишҷӯён бо QR
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+hide empty members
+
+package "Модели доменӣ" {
+
+    enum UserRole {
+        admin
+        teacher
+        student
+    }
+
+    enum AttendanceStatus {
+        present
+        absent
+        late
+    }
+
+    enum LessonStatus {
+        planned
+        active
+        finished
+    }
+
+    class User <<entity>> {
+        +id: int
+        +fullName: string
+        +username: string
+        -passwordHash: string
+        +role: UserRole
+        +isActive: bool
+    }
+
+    class Group <<entity>> {
+        +id: int
+        +name: string
+        +course: int
+        +faculty: string
+    }
+
+    class Subject <<entity>> {
+        +id: int
+        +name: string
+        +description: ?string
+    }
+
+    class Lesson <<entity>> {
+        +id: int
+        +groupId: int
+        +subjectId: int
+        +teacherId: int
+        +lessonDate: date
+        +status: LessonStatus
+    }
+
+    class Attendance <<entity>> {
+        +id: int
+        +studentId: int
+        +lessonId: int
+        +status: AttendanceStatus
+        +attendanceTime: datetime
+    }
+
+    class QRToken <<entity>> {
+        +id: int
+        +lessonId: int
+        +token: string
+        +createdAt: datetime
+        +expiresAt: datetime
+        +isValid(): bool
+    }
+
+    Group "1" o-- "0..*" User : донишҷӯён
+    User "1" -- "0..*" Lesson : омӯзгор
+    Group "1" -- "0..*" Lesson : гурӯҳи дарс
+    Subject "1" -- "0..*" Lesson : фан
+    Lesson "1" *-- "0..*" QRToken : рамзҳои QR
+    User "1" -- "0..*" Attendance : донишҷӯ
+    Lesson "1" -- "0..*" Attendance : ҳозиршавӣ
+
+    Attendance ..> AttendanceStatus
+    Lesson ..> LessonStatus
+    User ..> UserRole
+}
+
+package "Синфҳои барнома" {
+
+    class AttendanceController {
+        -repository: AttendanceRepository
+        -database: Database
+        +scan(token: string): void
+        +record(studentId: int, lessonId: int): bool
+        +checkDuplicate(studentId: int, lessonId: int): bool
+        +showResult(): void
+    }
+
+    class AttendanceRepository {
+        -database: Database
+        +findLessonByToken(token: string): ?array
+        +findAttendance(studentId: int, lessonId: int): ?array
+        +create(studentId: int, lessonId: int): bool
+        +getByStudent(studentId: int): array
+    }
+
+    class Database {
+        -pdo: PDO
+        +connect(): PDO
+        +query(sql: string): array
+        +execute(sql: string): bool
+    }
+}
+
+AttendanceController --> AttendanceRepository : истифода мебарад
+AttendanceController --> Database : пайвастшавӣ
+AttendanceRepository --> Database : дархост ба ПД
+AttendanceRepository ..> Attendance : мехонад ва сабт мекунад
+AttendanceRepository ..> QRToken : месанҷад
+
+@enduml

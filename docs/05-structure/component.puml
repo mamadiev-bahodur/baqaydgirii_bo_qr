@@ -1,0 +1,64 @@
+@startuml component
+title Диаграммаи компонентҳои низоми ҳозиршавии донишҷӯён бо QR
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam packageStyle rectangle
+
+actor "Истифодабаранда\n(Маъмур / Омӯзгор / Донишҷӯ)" as User
+
+node "Браузер" as Browser {
+    [Саҳифаи веб\nHTML, CSS, JavaScript] as Web
+    [Сканери QR\nКамераи телефон] as Scanner
+}
+
+node "Сервери веб\nApache + PHP (XAMPP)" as Server {
+
+    package "Қабати муаррифӣ (Presentation)" {
+        [scan.php\nСаҳифаи сканкунӣ] as Scan
+        [qr_display.php\nНамоиши рамзи QR] as QRView
+        [partials/header.php\npartials/footer.php] as Layout
+    }
+
+    package "Қабати мантиқ (Business Logic)" {
+        [record_attendance.php\nКоркарди ҳозиршавӣ] as Controller
+        [api_qr.php\nСохтан ва нав кардани QR] as QRService
+        [config/auth.php\nСанҷиши ҳуқуқи дастрасӣ] as Auth
+    }
+
+    package "Қабати додаҳо (Data Access)" {
+        [AttendanceRepository\nСабт ва ҷустуҷӯи ҳозиршавӣ] as Repo
+        [config/db.php\nПайвастшавӣ бо PDO] as DBAccess
+    }
+}
+
+database "MySQL / MariaDB\nПойгоҳи додаҳо" as MySQL
+
+User --> Web : истифодаи низом
+Web --> Scanner : фаъол кардани камера
+Scanner --> Scan : фиристодани QR
+Web --> Scan : HTTP GET
+Web --> QRView : HTTP GET
+Web --> Controller : HTTP POST
+Web --> QRService : HTTP GET / JSON
+
+Scan --> Layout : намоиши саҳифа
+QRView --> Layout : намоиши саҳифа
+
+Scan --> Auth : санҷиши иҷозат
+QRView --> Auth : санҷиши нақш
+Controller --> Auth : санҷиши донишҷӯ
+Controller --> Repo : сабти ҳозиршавӣ
+QRService --> Repo : санҷиши дарс ва QR
+
+Repo --> DBAccess : дархости додаҳо
+DBAccess --> MySQL : PDO / SQL / TCP 3306
+
+legend right
+  |= Қисми MVC |= Компонентҳо |
+  | Model | AttendanceRepository + Database |
+  | View | scan.php + qr_display.php + Layout |
+  | Controller | record_attendance.php + api_qr.php |
+endlegend
+
+@enduml
