@@ -1,6 +1,11 @@
 <?php
 require_once __DIR__ . '/config/auth.php';
+require_once __DIR__ . '/src/autoload.php';
 require_role('admin');
+
+$groupRepo = new GroupRepository($pdo);
+$userRepo = new UserRepository($pdo);
+$sessionRepo = new SessionRepository($pdo);
 $notice=''; $error='';
 if ($_SERVER['REQUEST_METHOD']==='POST') {
     verify_csrf();
@@ -9,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
         if ($action==='group') {
             $name=trim($_POST['group_name']??'');
             if ($name==='') throw new RuntimeException('Номи гурӯҳро ворид кунед.');
-            $pdo->prepare("INSERT INTO student_groups(group_name) VALUES(?)")->execute([$name]);
+            $groupRepo->create($name);
             $notice='Гурӯҳ илова карда шуд.';
         } elseif ($action==='user') {
             $name=trim($_POST['full_name']??''); $username=trim($_POST['username']??'');
@@ -19,26 +24,32 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
             if ($name===''||$username===''||strlen($password)<8) throw new RuntimeException('Маълумотро пур кунед. Парол бояд камаш 8 аломат бошад.');
             if (!in_array($role,['teacher','student'],true)) throw new RuntimeException('Нақш нодуруст аст.');
             if ($role==='student' && ($code==='' || !$group)) throw new RuntimeException('Рамзи донишҷӯӣ ва гурӯҳро интихоб кунед.');
-            $stmt=$pdo->prepare("INSERT INTO users(full_name,username,password_hash,role,student_code,group_id) VALUES(?,?,?,?,?,?)");
-            $stmt->execute([$name,$username,password_hash($password,PASSWORD_DEFAULT),$role,$role==='student'?$code:null,$role==='student'?$group:null]);
+            $userRepo->create([
+                'full_name' => $name,
+                'username' => $username,
+                'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+                'role' => $role,
+                'student_code' => $role === 'student' ? $code : null,
+                'group_id' => $role === 'student' ? $group : null,
+            ]);
             $notice='Корбар илова карда шуд.';
         } elseif ($action==='toggle_user') {
             $id=(int)($_POST['id']??0);
-            $pdo->prepare("UPDATE users SET is_active=1-is_active WHERE id=? AND role IN ('teacher','student')")->execute([$id]);
+            $userRepo->toggleActive($id);
             audit_log($pdo,'user_status','Тағйири ҳолати корбар '.$id); $notice='Ҳолати корбар тағйир дода шуд.';
         } elseif ($action==='delete_user') {
             $id=(int)($_POST['id']??0);
-            $pdo->prepare("DELETE FROM users WHERE id=? AND role IN ('teacher','student')")->execute([$id]);
+            $userRepo->delete($id);
             $notice='Корбар нест карда шуд.';
         } elseif ($action==='delete_group') {
             $id=(int)($_POST['id']??0);
-            $pdo->prepare("DELETE FROM student_groups WHERE id=?")->execute([$id]);
+            $groupRepo->delete($id);
             $notice='Гурӯҳ нест карда шуд.';
         }
     } catch (Throwable $ex) { $error=$ex instanceof PDOException?'Ин маълумот такрорӣ аст ё бо сабтҳои дигар алоқаманд мебошад.':$ex->getMessage(); }
 }
-$groups=$pdo->query("SELECT * FROM student_groups ORDER BY group_name")->fetchAll();
-$users=$pdo->query("SELECT u.*,g.group_name FROM users u LEFT JOIN student_groups g ON g.id=u.group_id WHERE u.role IN ('teacher','student') ORDER BY u.id DESC")->fetchAll();
+$groups=$groupRepo->getAll();
+$users=$userRepo->getAll(100, 0);
 $pageTitle='Идоракунии корбарон';
 require __DIR__.'/partials/header.php';
 ?>
