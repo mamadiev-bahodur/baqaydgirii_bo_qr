@@ -15,6 +15,7 @@ class UserRepository
                     g.group_name
              FROM users u
              LEFT JOIN student_groups g ON g.id = u.group_id
+             WHERE u.role IN ('teacher', 'student')
              ORDER BY u.id DESC
              LIMIT :limit OFFSET :offset"
         );
@@ -118,7 +119,7 @@ class UserRepository
                        u.student_code, u.is_active, g.group_name
                 FROM users u
                 LEFT JOIN student_groups g ON g.id = u.group_id
-                WHERE (u.full_name LIKE :term_name ESCAPE '!'
+                WHERE u.role IN ('teacher', 'student') AND (u.full_name LIKE :term_name ESCAPE '!'
                     OR u.username LIKE :term_username ESCAPE '!')";
 
         $params = [
@@ -160,7 +161,7 @@ class UserRepository
                        u.student_code, u.is_active, g.group_name
                 FROM users u
                 LEFT JOIN student_groups g ON g.id = u.group_id
-                WHERE (u.full_name LIKE :term_name ESCAPE '!'
+                WHERE u.role IN ('teacher', 'student') AND (u.full_name LIKE :term_name ESCAPE '!'
                     OR u.username LIKE :term_username ESCAPE '!')";
 
         $params = [
@@ -206,7 +207,7 @@ class UserRepository
 
         $sql = "SELECT COUNT(*)
                 FROM users u
-                WHERE (u.full_name LIKE :term_name ESCAPE '!'
+                WHERE u.role IN ('teacher', 'student') AND (u.full_name LIKE :term_name ESCAPE '!'
                     OR u.username LIKE :term_username ESCAPE '!')";
 
         $params = [
