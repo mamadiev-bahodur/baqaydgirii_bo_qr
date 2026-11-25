@@ -19,8 +19,8 @@ if ($count > 0) {
     }
 }
 ?>
-<!doctype html><html lang="tg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Сохтани администратор</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"><link href="assets/css/style.css" rel="stylesheet"></head>
+<!doctype html><html lang="tg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Сохтани администратор</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"><link href="assets/css/style.css" rel="stylesheet"><link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"></head>
 <body class="auth-bg"><main class="auth-card"><div class="brand-mark">SA</div><h2>Сохтани администратор</h2><p class="small muted">Баҳисобгирии ҳозиршавии донишҷӯён бо рамзи QR</p><p class="muted">Ин амал танҳо як маротиба иҷро мешавад.</p>
 <?php if ($message): ?><div class="alert alert-info"><?= e($message) ?></div><?php endif; ?>
 <?php if ($count === 0): ?><form method="post"><input type="hidden" name="csrf" value="<?= e(csrf_token()) ?>"><label class="form-label">Ному насаб</label><input class="form-control mb-3" name="full_name" required><label class="form-label">Номи корбар</label><input class="form-control mb-3" name="username" required><label class="form-label">Парол (на камтар аз 8 аломат)</label><input class="form-control mb-3" type="password" name="password" minlength="8" required><button class="btn btn-primary w-100">Сохтани администратор</button></form><?php endif; ?>
-<a class="d-block mt-3" href="login.php">Ба саҳифаи воридшавӣ</a></main></body></html>
+<a class="d-block mt-3" href="login.php">Ба саҳифаи воридшавӣ</a></main><script src="assets/js/password-toggle.js"></script></body></html>
