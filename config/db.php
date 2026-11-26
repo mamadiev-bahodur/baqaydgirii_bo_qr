@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-$host = '127.0.0.1';
-$dbname = 'student_attendance_qr';
-$dbuser = 'root';
-$dbpass = ''; // XAMPP default; change if your MySQL root has a password.
+$host = 'sql211.infinityfree.com';
+$dbname = 'if0_43479744_qr';
+$dbuser = 'if0_43479744';
+$dbpass = 'dferhtDbgfn '; // XAMPP default; change if your MySQL root has a password.
 
 try {
     $pdo = new PDO(
